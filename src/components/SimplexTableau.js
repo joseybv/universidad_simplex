@@ -83,7 +83,7 @@ export default class Simplex {
     response.headers = headers;
     response.tableau = Pi;
     response.pivot = [];
-    return response;
+    return Pi;
   }
 
   printTable(table) {
