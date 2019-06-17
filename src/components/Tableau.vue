@@ -11,13 +11,11 @@
 export default {
   name: "tableau",
   props: {
-    data: {
-      type: Array,
-      default: []
+    data() {
+      return { type: Array, default: [] };
     }
   }
 };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
