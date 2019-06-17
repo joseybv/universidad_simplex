@@ -43,9 +43,7 @@
       </v-card>
     </v-layout>
 
-    <v-chip close v-for="item in calculate" v-bind:key="item.slack.label">{{
-      item.z
-    }}</v-chip>
+    <v-chip close v-for="item in calculate" v-bind:key="item.slack.label">{{item.z}}</v-chip>
     <v-textarea label="label" name="name" v-model="tableau"></v-textarea>
     <v-btn color="success" @click="buildTableau">text</v-btn>
     <div v-html="tableText"></div>
@@ -54,11 +52,11 @@
 
 <script>
 import Simplex from "./SimplexTableau";
-//import Tableau from "../components/Tableau";
+import Tableau from "../components/Tableau";
 export default {
   name: "simplex",
   components: {
-    //Tableau
+    Tableau
   },
   data() {
     return {
@@ -121,12 +119,13 @@ export default {
       return restriction;
     },
     calculate() {
-      return this.simplex.normalizeRestrictions(
+      this.normalizeRestrictions = this.simplex.normalizeRestrictions(
         "maximizar",
         this.constraints,
         this.x1,
         this.x2
       );
+      return this.normalizeRestrictions;
     },
     tableText() {
       return this.simplex.printTable(this.tableau);
@@ -134,7 +133,7 @@ export default {
   },
   methods: {
     buildTableau() {
-      this.tableau = this.simplex.buildInitialBoard(this.calculate);
+      this.tableau = this.simplex.buildInitialBoard(this.normalizeRestrictions);
     }
   }
 };
