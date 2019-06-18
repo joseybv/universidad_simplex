@@ -25,35 +25,12 @@
             ></v-text-field>
           </v-flex>
           <v-flex xs12>
-            <v-layout row wrap>
-              <v-flex xs8>
-                <v-text-field
-                  type="number"
-                  box
-                  name="restricciones"
-                  label="Cantidad de restricciones"
-                  id="restricciones"
-                  v-model="restrictionCount"
-                ></v-text-field>
-              </v-flex>
-              <v-flex xs4>
-                <v-btn color="success">generar</v-btn>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <v-flex xs12>
             <v-card-title>Restricciones del método</v-card-title>
           </v-flex>
           <v-flex xs12>
             <v-layout row wrap>
               <v-flex xs3>
-                <v-text-field
-                  type="number"
-                  box
-                  :name="restriction1.X1.name"
-                  :label="restriction1.X1.label"
-                  :model="restriction1.X1.factor"
-                ></v-text-field>
+                <v-text-field type="number" box name="R1X1" label="X-1" v-model="R1.X1Factor"></v-text-field>
               </v-flex>
               <v-flex xs1>
                 <v-card flat>
@@ -61,40 +38,22 @@
                 </v-card>
               </v-flex>
               <v-flex xs3>
-                <v-text-field
-                  type="number"
-                  box
-                  :name="restriction1.X2.name"
-                  :label="restriction1.X2.label"
-                  :model="restriction1.X2.factor"
-                ></v-text-field>
+                <v-text-field type="number" box name="X2" label="X-2" v-model="R1.X2Factor"></v-text-field>
               </v-flex>
               <v-flex xs1>
                 <v-card flat>
-                  <v-card-text>{{restriction1.type}}</v-card-text>
+                  <v-card-text>{{R1Type}}</v-card-text>
                 </v-card>
               </v-flex>
               <v-flex xs3>
-                <v-text-field
-                  type="number"
-                  box
-                  :name="restriction1.label"
-                  :label="restriction1.label"
-                  :model="restriction1.result"
-                ></v-text-field>
+                <v-text-field type="number" box name="P0" label="P0" v-model="R1.Value"></v-text-field>
               </v-flex>
             </v-layout>
           </v-flex>
           <v-flex xs12>
             <v-layout row wrap>
               <v-flex xs3>
-                <v-text-field
-                  type="number"
-                  box
-                  :name="restriction2.X1.name"
-                  :label="restriction2.X1.label"
-                  :model="restriction2.X1.factor"
-                ></v-text-field>
+                <v-text-field type="number" box name="X1" label="X-1" v-model="R2X1Factor"></v-text-field>
               </v-flex>
               <v-flex xs1>
                 <v-card flat>
@@ -102,27 +61,15 @@
                 </v-card>
               </v-flex>
               <v-flex xs3>
-                <v-text-field
-                  type="number"
-                  box
-                  :name="restriction2.X2.name"
-                  :label="restriction2.X2.label"
-                  :model="restriction2.X2.factor"
-                ></v-text-field>
+                <v-text-field type="number" box name="X2" label="X-2" :model="R2X2Factor"></v-text-field>
               </v-flex>
               <v-flex xs1>
                 <v-card flat>
-                  <v-card-text>{{restriction2.type}}</v-card-text>
+                  <v-card-text>{{R2Type}}</v-card-text>
                 </v-card>
               </v-flex>
               <v-flex xs3>
-                <v-text-field
-                  type="number"
-                  box
-                  :name="restriction2.label"
-                  :label="restriction2.label"
-                  :model="restriction2.result"
-                ></v-text-field>
+                <v-text-field type="number" box name="R2P0" label="P-0" :model="R2Value"></v-text-field>
               </v-flex>
             </v-layout>
           </v-flex>
@@ -157,38 +104,20 @@ export default {
       restrictionCount: 0,
       normalizeRestrictions: [],
       tableau: [],
-      restriction1: {
-        id: 0,
-        type: "<=",
-        result: 0,
-        label: "P0",
-        X1: {
-          label: "X-1",
-          name: "X1",
-          factor: 0
-        },
-        X2: {
-          label: "X-2",
-          name: "X2",
-          factor: 0
-        }
+      R1: {
+        X1Factor: 0,
+        X2Factor: 0,
+        Value: 0,
+        Type: "<="
       },
-      restriction2: {
-        id: 1,
-        type: "<=",
-        result: 0,
-        label: "P1",
-        X1: {
-          label: "X-1",
-          name: "X1",
-          factor: 0
-        },
-        X2: {
-          label: "X-2",
-          name: "X2",
-          factor: 0
-        }
-      }
+      R1X1Factor: 0,
+      R1X2Factor: 0,
+      R1Value: 0,
+      R1Type: 0,
+      R2X1Factor: 0,
+      R2X2Factor: 0,
+      R2Value: 0,
+      R2Type: 0
     };
   },
   computed: {
@@ -207,7 +136,8 @@ export default {
     },
     buildConstraints() {
       let constraints = [];
-      for (let restriction of [this.restriction1, this.restriction2]) {
+      let restrictions = [{}, {}];
+      for (let restriction of restrictions) {
         constraints.push({
           type: restriction.type,
           result: restriction.result,
