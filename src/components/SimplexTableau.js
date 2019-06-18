@@ -41,7 +41,8 @@ export default class Simplex {
   buildInitialBoard(constraints) {
     if (!constraints || !Array.isArray(constraints)) return "none";
     let response = {};
-    let Pi = [];
+    let DisplayTable = [];
+    let Matrix = [];
     let Z = [
       "Z",
       NaN,
@@ -53,8 +54,8 @@ export default class Simplex {
       "Input",
       NaN,
       NaN,
-      constraints[0].x1.value * -1,
-      constraints[0].x2.value * -1
+      constraints[0].x1.value,
+      constraints[0].x2.value
     ];
     let headers = ["Label", "Cb", "P0", "P1", "P2"];
 
@@ -75,37 +76,52 @@ export default class Simplex {
           P.push(0);
         }
       }
-      Pi.push(P);
+      DisplayTable.push(P);
     }
-    Pi.unshift(headers);
-    Pi.unshift(Base);
-    Pi.push(Z);
+    Matrix = DisplayTable;
+
+    DisplayTable.unshift(headers);
+    DisplayTable.unshift(Base);
+    DisplayTable.push(Z);
 
     let smallestZ = 0;
     let pivotColumn = 0;
-    let pivotRow = 0;
-    for (let idx = 0; idx < Z.length; Z++) {
+    for (let idx = 0; idx < Z.length; idx++) {
       if (Z[idx] < smallestZ) {
         smallestZ = Z[idx];
         pivotColumn = idx;
       }
     }
+
+    let largest = 0;
+    let pivotRow = 0;
+    for (let idx = 0; idx < Matrix.length; idx++) {
+      if (Matrix[idx][pivotColumn] > largest) {
+        largest = Matrix[idx][pivotColumn];
+        pivotRow = idx;
+      }
+    }
+
+    response.pivotValue = Matrix[pivotRow][pivotColumn];
     response.pivot = [pivotRow, pivotColumn];
     response.input = Base;
     response.headers = headers;
-    response.tableau = Pi;
-    return Pi;
+    response.matrix = Matrix;
+    response.display = DisplayTable;
+    return response;
   }
 
-  printTable(table) {
+  printTable(table, pivot) {
     let tableText = "<table class='table' border='1'>";
-    for (let row of table) {
+    table.forEach((row, idxRow) => {
       tableText += "<tr>";
-      for (let cell of row) {
-        tableText += "<td>{0}</td>".format(cell);
-      }
+      row.forEach((cell, idxCol) => {
+        if (idxRow === pivot[0] && idxCol === pivot[1])
+          tableText += "<th>{0}</th>".format(cell);
+        else tableText += "<td>{0}</td>".format(cell);
+      });
       tableText += "</tr>";
-    }
+    });
     tableText += "</table>";
     return tableText;
   }

@@ -25,35 +25,35 @@
             ></v-text-field>
           </v-flex>
           <v-flex xs12>
-            <v-card-title>Restricciones del método</v-card-title>
-          </v-flex>
-          <v-flex xs12>
             <v-layout row wrap>
-              <v-flex xs3>
-                <v-text-field type="number" box name="R1X1" label="X-1" v-model="R1.X1Factor"></v-text-field>
+              <v-flex xs8>
+                <v-text-field
+                  type="number"
+                  box
+                  name="restricciones"
+                  label="Cantidad de restricciones"
+                  id="restricciones"
+                  v-model="restrictionCount"
+                ></v-text-field>
               </v-flex>
-              <v-flex xs1>
-                <v-card flat>
-                  <v-card-text>+</v-card-text>
-                </v-card>
-              </v-flex>
-              <v-flex xs3>
-                <v-text-field type="number" box name="X2" label="X-2" v-model="R1.X2Factor"></v-text-field>
-              </v-flex>
-              <v-flex xs1>
-                <v-card flat>
-                  <v-card-text>{{R1Type}}</v-card-text>
-                </v-card>
-              </v-flex>
-              <v-flex xs3>
-                <v-text-field type="number" box name="P0" label="P0" v-model="R1.Value"></v-text-field>
+              <v-flex xs4>
+                <v-btn color="success" @click="buildRestrictions">generar</v-btn>
               </v-flex>
             </v-layout>
           </v-flex>
           <v-flex xs12>
+            <v-card-title>Restricciones del método</v-card-title>
+          </v-flex>
+          <v-flex xs12 v-for="item in restrictions" v-bind:key="item.id">
             <v-layout row wrap>
               <v-flex xs3>
-                <v-text-field type="number" box name="X1" label="X-1" v-model="R2X1Factor"></v-text-field>
+                <v-text-field
+                  type="number"
+                  box
+                  :name="item.X1.name"
+                  :label="item.X1.label"
+                  v-model="item.X1.value"
+                ></v-text-field>
               </v-flex>
               <v-flex xs1>
                 <v-card flat>
@@ -61,15 +61,27 @@
                 </v-card>
               </v-flex>
               <v-flex xs3>
-                <v-text-field type="number" box name="X2" label="X-2" :model="R2X2Factor"></v-text-field>
+                <v-text-field
+                  type="number"
+                  box
+                  :name="item.X2.name"
+                  :label="item.X2.label"
+                  v-model="item.X2.value"
+                ></v-text-field>
               </v-flex>
               <v-flex xs1>
                 <v-card flat>
-                  <v-card-text>{{R2Type}}</v-card-text>
+                  <v-card-text>{{item.type}}</v-card-text>
                 </v-card>
               </v-flex>
               <v-flex xs3>
-                <v-text-field type="number" box name="R2P0" label="P-0" :model="R2Value"></v-text-field>
+                <v-text-field
+                  type="number"
+                  box
+                  :name="item.label"
+                  :label="item.label"
+                  v-model="item.value"
+                ></v-text-field>
               </v-flex>
             </v-layout>
           </v-flex>
@@ -89,40 +101,26 @@
 
 <script>
 import Simplex from "./SimplexTableau";
-import Tableau from "../components/Tableau";
 export default {
   name: "simplex",
   components: {
-    Tableau
   },
   data() {
     return {
       simplex: new Simplex(),
+      simplexResponse: {},
       vars: 0,
       x1: { value: 3, label: "X1" },
       x2: { value: 2, label: "X2" },
       restrictionCount: 0,
       normalizeRestrictions: [],
       tableau: [],
-      R1: {
-        X1Factor: 0,
-        X2Factor: 0,
-        Value: 0,
-        Type: "<="
-      },
-      R1X1Factor: 0,
-      R1X2Factor: 0,
-      R1Value: 0,
-      R1Type: 0,
-      R2X1Factor: 0,
-      R2X2Factor: 0,
-      R2Value: 0,
-      R2Type: 0
+      restrictions: []
     };
   },
   computed: {
     tableText() {
-      return this.simplex.printTable(this.tableau);
+      return this.simplex.printTable(this.tableau, this.simplexResponse.pivot);
     }
   },
   methods: {
@@ -135,20 +133,53 @@ export default {
       );
     },
     buildConstraints() {
+      if (this.restrictions.length == 0) return;
       let constraints = [];
-      let restrictions = [{}, {}];
-      for (let restriction of restrictions) {
+      for (let restriction of this.restrictions) {
         constraints.push({
           type: restriction.type,
-          result: restriction.result,
-          x1: restriction.X1,
-          x2: restriction.X2
+          result: restriction.value,
+          x1: {
+            factor: restriction.X1.value
+          },
+          x2: {
+            factor: restriction.X2.value
+          }
         });
       }
       return constraints;
     },
+    buildRestrictions() {
+      let restriction = [];
+      while (this.restrictions.length > this.restrictionCount) {
+        this.restrictions.pop();
+      }
+      for (
+        let index = this.restrictions.length;
+        index <= this.restrictionCount - 1;
+        index++
+      ) {
+        this.restrictions.push({
+          id: index,
+          X1: {
+            name: "X1",
+            label: "X-1",
+            value: 0
+          },
+          X2: {
+            name: "X2",
+            label: "X-2",
+            value: 0
+          },
+          type: "<=",
+          label: "P" + index,
+          value: 0
+        });
+      }
+    },
     buildTableau() {
-      this.tableau = this.simplex.buildInitialBoard(this.normalizeRestrictions);
+      this.simplexResponse = this.simplex.buildInitialBoard(this.normalizeRestrictions);
+      this.tableau = this.simplexResponse.display;
     }
   }
 };
