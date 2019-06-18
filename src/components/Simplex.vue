@@ -93,8 +93,7 @@
     </v-card>
 
     <v-chip close v-for="item in normalizeRestrictions" v-bind:key="item.slack.label">{{item.z}}</v-chip>
-    <v-textarea label="label" name="name" v-model="tableau"></v-textarea>
-    <v-btn color="success" @click="buildTableau">text</v-btn>
+    <v-btn color="success" @click="buildTableau">Ver primera iteración</v-btn>
     <div v-html="tableText"></div>
   </v-container>
 </template>
@@ -103,8 +102,7 @@
 import Simplex from "./SimplexTableau";
 export default {
   name: "simplex",
-  components: {
-  },
+  components: {},
   data() {
     return {
       simplex: new Simplex(),
@@ -125,16 +123,20 @@ export default {
   },
   methods: {
     calculate() {
+      this.buildRestrictions();
+      let constraints = this.buildConstraints();
+      if (constraints.length === 0) return;
       this.normalizeRestrictions = this.simplex.normalizeRestrictions(
         "maximizar",
-        this.buildConstraints(),
+        constraints,
         this.x1,
         this.x2
       );
     },
     buildConstraints() {
-      if (this.restrictions.length == 0) return;
       let constraints = [];
+      if (this.restrictions.length == 0) this.buildRestrictions();
+      if (this.restrictions.length == 0) return constraints;
       for (let restriction of this.restrictions) {
         constraints.push({
           type: restriction.type,
@@ -151,6 +153,7 @@ export default {
     },
     buildRestrictions() {
       let restriction = [];
+      if (this.restrictionCount == 0) return restriction;
       while (this.restrictions.length > this.restrictionCount) {
         this.restrictions.pop();
       }
@@ -178,7 +181,11 @@ export default {
       }
     },
     buildTableau() {
-      this.simplexResponse = this.simplex.buildInitialBoard(this.normalizeRestrictions);
+      this.calculate();
+      if (this.normalizeRestrictions.length === 0) return;
+      this.simplexResponse = this.simplex.buildInitialBoard(
+        this.normalizeRestrictions
+      );
       this.tableau = this.simplexResponse.display;
     }
   }

@@ -69,16 +69,19 @@ export default class Simplex {
       P.push(element.result);
       P.push(element.x1.factor);
       P.push(element.x2.factor);
+      let InnerMatrix = [element.x1.factor, element.x2.factor];
       for (let constraint of constraints) {
         if (constraint.slack.id === element.slack.id) {
           P.push(constraint.slack.factor);
+          InnerMatrix.push(constraint.slack.factor);
         } else {
           P.push(0);
+          InnerMatrix.push(0);
         }
       }
+      Matrix.push(InnerMatrix);
       DisplayTable.push(P);
     }
-    Matrix = DisplayTable;
 
     DisplayTable.unshift(headers);
     DisplayTable.unshift(Base);
@@ -95,14 +98,14 @@ export default class Simplex {
 
     let largest = 0;
     let pivotRow = 0;
-    for (let idx = 0; idx < Matrix.length; idx++) {
-      if (Matrix[idx][pivotColumn] > largest) {
-        largest = Matrix[idx][pivotColumn];
+    for (let idx = 2; idx < DisplayTable.length; idx++) {
+      if (DisplayTable[idx][pivotColumn] > largest) {
+        largest = DisplayTable[idx][pivotColumn];
         pivotRow = idx;
       }
     }
 
-    response.pivotValue = Matrix[pivotRow][pivotColumn];
+    response.pivotValue = DisplayTable[pivotRow][pivotColumn];
     response.pivot = [pivotRow, pivotColumn];
     response.input = Base;
     response.headers = headers;
@@ -117,7 +120,7 @@ export default class Simplex {
       tableText += "<tr>";
       row.forEach((cell, idxCol) => {
         if (idxRow === pivot[0] && idxCol === pivot[1])
-          tableText += "<th>{0}</th>".format(cell);
+          tableText += "<th bgcolor='#82b1ff'>{0}</th>".format(cell);
         else tableText += "<td>{0}</td>".format(cell);
       });
       tableText += "</tr>";
