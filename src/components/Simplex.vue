@@ -1,49 +1,139 @@
 <template>
   <v-container>
-    <v-layout row wrap>
-      <v-card dark raised>
-        <v-card-title primary-title>Propiedades del Método</v-card-title>
-        <v-card-text>
-          <v-flex xs12>
+    <v-card dark raised>
+      <v-card-title primary-title>Propiedades del Método</v-card-title>
+      <v-card-text>
+        <v-layout row wrap>
+          <v-flex xs4 offset-xs1>
             <v-text-field
+              type="number"
               box
-              name="Variables"
-              label="Número de varibles"
-              id="variables"
-              v-model="vars"
+              name="x1"
+              label="Valor de X1"
+              id="varx1"
+              v-model="x1.value"
+            ></v-text-field>
+          </v-flex>
+          <v-flex xs4 offset-xs2>
+            <v-text-field
+              type="number"
+              box
+              name="x2"
+              label="Valor de X2"
+              id="varx2"
+              v-model="x2.value"
             ></v-text-field>
           </v-flex>
           <v-flex xs12>
-            <v-text-field
-              box
-              name="restricciones"
-              label="Cantidad de restricciones"
-              id="restricciones"
-              v-model="restrictionCount"
-            ></v-text-field>
+            <v-layout row wrap>
+              <v-flex xs8>
+                <v-text-field
+                  type="number"
+                  box
+                  name="restricciones"
+                  label="Cantidad de restricciones"
+                  id="restricciones"
+                  v-model="restrictionCount"
+                ></v-text-field>
+              </v-flex>
+              <v-flex xs4>
+                <v-btn color="success">generar</v-btn>
+              </v-flex>
+            </v-layout>
           </v-flex>
-          <v-card-title>Restricciones del método</v-card-title>
-          <v-flex xs4 v-for="row in restrictions" v-bind:key="row">
-            <v-text-field
-              v-for="item in row"
-              v-bind:key="item.id"
-              box
-              :name="item.name"
-              :label="item.label"
-              :model="item.value"
-            ></v-text-field>
+          <v-flex xs12>
+            <v-card-title>Restricciones del método</v-card-title>
           </v-flex>
-          <v-btn ripple round icon color="primary">
-            <v-icon large color="white">add</v-icon>
-          </v-btn>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn color="info">adelante</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-layout>
+          <v-flex xs12>
+            <v-layout row wrap>
+              <v-flex xs3>
+                <v-text-field
+                  type="number"
+                  box
+                  :name="restriction1.X1.name"
+                  :label="restriction1.X1.label"
+                  :model="restriction1.X1.factor"
+                ></v-text-field>
+              </v-flex>
+              <v-flex xs1>
+                <v-card flat>
+                  <v-card-text>+</v-card-text>
+                </v-card>
+              </v-flex>
+              <v-flex xs3>
+                <v-text-field
+                  type="number"
+                  box
+                  :name="restriction1.X2.name"
+                  :label="restriction1.X2.label"
+                  :model="restriction1.X2.factor"
+                ></v-text-field>
+              </v-flex>
+              <v-flex xs1>
+                <v-card flat>
+                  <v-card-text>{{restriction1.type}}</v-card-text>
+                </v-card>
+              </v-flex>
+              <v-flex xs3>
+                <v-text-field
+                  type="number"
+                  box
+                  :name="restriction1.label"
+                  :label="restriction1.label"
+                  :model="restriction1.result"
+                ></v-text-field>
+              </v-flex>
+            </v-layout>
+          </v-flex>
+          <v-flex xs12>
+            <v-layout row wrap>
+              <v-flex xs3>
+                <v-text-field
+                  type="number"
+                  box
+                  :name="restriction2.X1.name"
+                  :label="restriction2.X1.label"
+                  :model="restriction2.X1.factor"
+                ></v-text-field>
+              </v-flex>
+              <v-flex xs1>
+                <v-card flat>
+                  <v-card-text>+</v-card-text>
+                </v-card>
+              </v-flex>
+              <v-flex xs3>
+                <v-text-field
+                  type="number"
+                  box
+                  :name="restriction2.X2.name"
+                  :label="restriction2.X2.label"
+                  :model="restriction2.X2.factor"
+                ></v-text-field>
+              </v-flex>
+              <v-flex xs1>
+                <v-card flat>
+                  <v-card-text>{{restriction2.type}}</v-card-text>
+                </v-card>
+              </v-flex>
+              <v-flex xs3>
+                <v-text-field
+                  type="number"
+                  box
+                  :name="restriction2.label"
+                  :label="restriction2.label"
+                  :model="restriction2.result"
+                ></v-text-field>
+              </v-flex>
+            </v-layout>
+          </v-flex>
+        </v-layout>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="info" @click="calculate">adelante</v-btn>
+      </v-card-actions>
+    </v-card>
 
-    <v-chip close v-for="item in calculate" v-bind:key="item.slack.label">{{item.z}}</v-chip>
+    <v-chip close v-for="item in normalizeRestrictions" v-bind:key="item.slack.label">{{item.z}}</v-chip>
     <v-textarea label="label" name="name" v-model="tableau"></v-textarea>
     <v-btn color="success" @click="buildTableau">text</v-btn>
     <div v-html="tableText"></div>
@@ -64,74 +154,69 @@ export default {
       vars: 0,
       x1: { value: 3, label: "X1" },
       x2: { value: 2, label: "X2" },
-      constraints: [
-        {
-          type: "<=",
-          result: 18,
-          x1: {
-            factor: 2
-          },
-          x2: {
-            factor: 0
-          }
-        },
-        {
-          type: "<=",
-          result: 32,
-          x1: {
-            factor: 2
-          },
-          x2: {
-            factor: 3
-          }
-        },
-        {
-          type: "<=",
-          result: 24,
-          x1: {
-            factor: 3
-          },
-          x2: {
-            factor: 0
-          }
-        }
-      ],
       restrictionCount: 0,
       normalizeRestrictions: [],
-      tableau: []
+      tableau: [],
+      restriction1: {
+        id: 0,
+        type: "<=",
+        result: 0,
+        label: "P0",
+        X1: {
+          label: "X-1",
+          name: "X1",
+          factor: 0
+        },
+        X2: {
+          label: "X-2",
+          name: "X2",
+          factor: 0
+        }
+      },
+      restriction2: {
+        id: 1,
+        type: "<=",
+        result: 0,
+        label: "P1",
+        X1: {
+          label: "X-1",
+          name: "X1",
+          factor: 0
+        },
+        X2: {
+          label: "X-2",
+          name: "X2",
+          factor: 0
+        }
+      }
     };
   },
   computed: {
-    restrictions() {
-      let restriction = [];
-      for (let index = 1; index <= this.restrictionCount; index++) {
-        let row = [];
-        for (let element = 1; element <= this.vars; element++) {
-          row.push({
-            id: element,
-            name: "X" + element,
-            label: "X-" + element,
-            value: 0
-          });
-        }
-        restriction.push(row);
-      }
-      return restriction;
-    },
-    calculate() {
-      this.normalizeRestrictions = this.simplex.normalizeRestrictions(
-        "maximizar",
-        this.constraints,
-        this.x1,
-        this.x2
-      );
-      return this.normalizeRestrictions;
-    },
     tableText() {
       return this.simplex.printTable(this.tableau);
     }
   },
   methods: {
+    calculate() {
+      this.normalizeRestrictions = this.simplex.normalizeRestrictions(
+        "maximizar",
+        this.buildConstraints(),
+        this.x1,
+        this.x2
+      );
+    },
+    buildConstraints() {
+      let constraints = [];
+      for (let restriction of [this.restriction1, this.restriction2]) {
+        constraints.push({
+          type: restriction.type,
+          result: restriction.result,
+          x1: restriction.X1,
+          x2: restriction.X2
+        });
+      }
+      return constraints;
+    },
     buildTableau() {
       this.tableau = this.simplex.buildInitialBoard(this.normalizeRestrictions);
     }

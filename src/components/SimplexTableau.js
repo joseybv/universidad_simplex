@@ -80,9 +80,20 @@ export default class Simplex {
     Pi.unshift(headers);
     Pi.unshift(Base);
     Pi.push(Z);
+
+    let smallestZ = 0;
+    let pivotColumn = 0;
+    let pivotRow = 0;
+    for (let idx = 0; idx < Z.length; Z++) {
+      if (Z[idx] < smallestZ) {
+        smallestZ = Z[idx];
+        pivotColumn = idx;
+      }
+    }
+    response.pivot = [pivotRow, pivotColumn];
+    response.input = Base;
     response.headers = headers;
     response.tableau = Pi;
-    response.pivot = [];
     return Pi;
   }
 
